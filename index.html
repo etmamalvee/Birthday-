@@ -1,4 +1,4 @@
-l<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -32,7 +32,8 @@ l<!DOCTYPE html>
     padding: 20px;
     overflow-x: hidden;
   }
-   /* 🔴 RED MARK: START - বার্থডে ব্যানার এবং ক্যানভাসের CSS স্টাইল 🔴 */
+
+  /* 🔴 RED MARK: START - বার্থডে ব্যানার এবং ক্যানভাসের CSS স্টাইল 🔴 */
   .birthday-banner {
     display: none;
     background: linear-gradient(45deg, #ff007f, #ffaa00);
@@ -61,7 +62,6 @@ l<!DOCTYPE html>
     display: none;
   }
   /* 🔴 RED MARK: END 🔴 */
-
 
   /* Title Animation */
   h1 {
@@ -432,6 +432,8 @@ l<!DOCTYPE html>
 </head>
 <body>
 
+<canvas id="birthdayCanvas"></canvas>
+<div id="birthdayBanner" class="birthday-banner"></div>
 <h1>📋 CHILDREN DUTY ROSTER</h1>
 
 <div class="controls">
@@ -462,7 +464,6 @@ l<!DOCTYPE html>
   <div class="modal">
     <h2>✏️ Edit Day Data</h2>
 
-    <label>Select Day to Edit:</label>
     <select id="editDay">
       <option value="Saturday">Saturday</option>
       <option value="Sunday">Sunday</option>
@@ -498,6 +499,7 @@ const ALL_CHILDREN = [
   "Juie","Afrain","Nafisa","Ashik","Abrar","Mou","Arpita","Anila","Ratan","Alvee",
   "Yeasmin","Sumaya","Jiniya"
 ];
+
 // 🔴 RED MARK: START - বাচ্চাদের বার্থডে অবজেক্ট ডেটা 🔴
 const CHILDREN_BIRTHDAYS = {
   "Onti": "May 24",
@@ -516,7 +518,7 @@ let defaultData = {
   Tuesday: { morning: ["Onti","Rida","Runu","Anika","Hasib","Saied","Suikraching"], evening: ["Juie","Afrain","Nafisa","Ashik","Mou","Arpita","Anila","Ratan","Alvee", "Abrar"], offday: ["Yeasmin","Sumaya","Jiniya"], leave: {} },
   Wednesday: { morning: ["Juie","Yeasmin","Hasib","Nafisa","Anila","Sumaya","Alvee"], evening: ["Mou","Saied","Abrar","Rida","Jiniya","Runu","Anika","Arpita","Suikraching","Ratan"], offday: ["Ashik","Afrain","Onti"], leave: {} },
   Thursday: { morning: ["Mou","Hasib","Rida","Arpita","Yeasmin","Anika","Saied"], evening: ["Onti","Sumaya","Runu","Nafisa","Anila","Afrain","Jiniya","Abrar","Ashiq","Ratan"], offday: ["Juie","Suikraching","Alvee"], leave: {} },
-  Friday: { morning: ["Onti","Mou","Afrain","Anila","Nafisa","Suikraching","Ratan"], evening: ["Sumaya","Jiniya","Saied","Juie","Abrar","Yeasmin","Arpita","Ashik","Rida","Hasib","Anika","Alvee"], offday: [], leave: {} }
+  Friday: { morning: ["Onti","Mou","Afrain","Anila","Nafisa","Suikraching","Ratan"], evening: ["Sumaya","Jiniya","Saied","Juie","Abrar","Yeasmin","Arpita","Ashik","Rida","Hasib","Anika","Alvee"], offday: ["Runu"], leave: {} }
 };
 
 let rosterData = JSON.parse(localStorage.getItem('rosterData')) || defaultData;
@@ -527,7 +529,8 @@ function formatDisplayDate(dateStr) {
   const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   return d.toLocaleDateString('en-US', opts);
 }
-  // 🔴 RED MARK: START - আজকের জন্মদিনের নাম খুঁজে বের করার লজিক 🔴
+
+// 🔴 RED MARK: START - আজকের জন্মদিনের নাম খুঁজে বের করার লজিক 🔴
 function getTodayBirthdays() {
   const dateVal = document.getElementById('dateInput').value;
   let targetDate = dateVal ? new Date(dateVal + 'T00:00:00') : new Date();
@@ -543,10 +546,8 @@ function getTodayBirthdays() {
 }
 // 🔴 RED MARK: END 🔴
 
-
 function render() {
   const card = document.getElementById('rosterCard');
-  // Dynamic refresh animation container
   card.classList.remove('run-animation');
 
   const day = document.getElementById('daySelect').value;
@@ -554,7 +555,8 @@ function render() {
   const data = rosterData[day];
 
   if (!data) return;
-   // 🔴 RED MARK: START - বার্থডে ব্যানার এবং অ্যানিমেশন ট্রিগার লজিক 🔴
+
+  // 🔴 RED MARK: START - বার্থডে ব্যানার এবং অ্যানিমেশন ট্রিগার লজিক 🔴
   const todayBirthdays = getTodayBirthdays();
   const banner = document.getElementById('birthdayBanner');
   if (todayBirthdays.length > 0) {
@@ -566,7 +568,6 @@ function render() {
     stopBirthdayAnimation();
   }
   // 🔴 RED MARK: END 🔴
-
 
   const morningSet = new Set(data.morning);
   const eveningSet = new Set(data.evening);
@@ -584,22 +585,22 @@ function render() {
     const isMorning = morningSet.has(name);
     const isEvening = eveningSet.has(name);
     let delay = (index * 0.03) + 's';
-     // 🔴 RED MARK: START - নাম প্রিন্ট করার সময় জন্মদিন হলে কেক ইমোজি বসানোর লজিক 🔴
+
+    // 🔴 RED MARK: START - নাম প্রিন্ট করার সময় জন্মদিন হলে কেক ইমোজি বসানোর লজিক 🔴
     let displayName = name;
     if (todayBirthdays.includes(name)) {
       displayName = `🎂 ${name} 🎂`;
     }
     // 🔴 RED MARK: END 🔴
 
-
     if (isMorning && isEvening) {
-      bothRows += `<tr class="row-both" style="animation-delay: ${delay}"><td>${name}</td><td>1</td><td>1</td></tr>`;
+      bothRows += `<tr class="row-both" style="animation-delay: ${delay}"><td>${displayName}</td><td>1</td><td>1</td></tr>`;
       index++;
     } else if (isMorning) {
-      morningRows += `<tr class="row-morning" style="animation-delay: ${delay}"><td>${name}</td><td>1</td><td></td></tr>`;
+      morningRows += `<tr class="row-morning" style="animation-delay: ${delay}"><td>${displayName}</td><td>1</td><td></td></tr>`;
       index++;
     } else if (isEvening) {
-      eveningRows += `<tr class="row-evening" style="animation-delay: ${delay}"><td>${name}</td><td></td><td>1</td></tr>`;
+      eveningRows += `<tr class="row-evening" style="animation-delay: ${delay}"><td>${displayName}</td><td></td><td>1</td></tr>`;
       index++;
     }
   });
@@ -664,11 +665,11 @@ let tableRows = morningRows + bothRows + eveningRows;
     </div>
   `;
 
-  // Trigger smooth rendering layout after nodes injection
   setTimeout(() => {
     card.classList.add('run-animation');
   }, 10);
 }
+
 // 🔴 RED MARK: START - Confetti (বেলুন ও ফ্লাওয়ার রেইন) অ্যানিমেশন মেইন ইঞ্জিন 🔴
 let animationTimer;
 const canvas = document.getElementById('birthdayCanvas');
@@ -728,12 +729,11 @@ function downloadRosterImage() {
   const selectedDay = document.getElementById('daySelect').value;
   const selectedDate = document.getElementById('dateInput').value || 'roster';
 
-  // CRITICAL FIX: Microsecond animation suspension for flawless canvas frame capture
   rosterCard.classList.remove('run-animation');
   rosterCard.style.opacity = '1'; 
 
   html2canvas(rosterCard, {
-    scale: 2, // Double quality configuration 
+    scale: 2, 
     backgroundColor: '#f4faf4',
     useCORS: true,
     logging: false
@@ -743,11 +743,10 @@ function downloadRosterImage() {
     link.href = canvas.toDataURL('image/png');
     link.click();
 
-    // Re-enable app interactive animations post download pipeline
     rosterCard.classList.add('run-animation');
   });
 }
-  // রিসেট করার নতুন ফাংশন
+
 function resetRosterData() {
   const confirmReset = confirm("Are you sure you want to reset all modified data to original defaults?");
   if (confirmReset) {
@@ -757,7 +756,6 @@ function resetRosterData() {
     alert("Data has been successfully reset!");
   }
 }
-
 
 function openEditModal() {
   const day = document.getElementById('daySelect').value;
@@ -819,9 +817,8 @@ function saveEdit() {
   
   leaveRaw.split('\n').forEach(line => {
     const trimmedLine = line.trim();
-    if (!trimmedLine) return; // ফাঁকা লাইন থাকলে সেটা বাদ দেবে
+    if (!trimmedLine) return; 
     
-    // লাইনের ভেতরের প্রথম স্পেসের ইনডেক্স বের করবে
     const firstSpaceIndex = trimmedLine.indexOf(' ');
     if (firstSpaceIndex !== -1) {
       const name = trimmedLine.substring(0, firstSpaceIndex).trim();
