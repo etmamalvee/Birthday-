@@ -32,6 +32,36 @@ l<!DOCTYPE html>
     padding: 20px;
     overflow-x: hidden;
   }
+   /* 🔴 RED MARK: START - বার্থডে ব্যানার এবং ক্যানভাসের CSS স্টাইল 🔴 */
+  .birthday-banner {
+    display: none;
+    background: linear-gradient(45deg, #ff007f, #ffaa00);
+    color: white;
+    font-family: 'Teko', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    padding: 10px 30px;
+    border-radius: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
+    animation: pulse 1.5s infinite;
+    text-align: center;
+    z-index: 10;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  #birthdayCanvas {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+  }
+  /* 🔴 RED MARK: END 🔴 */
+
 
   /* Title Animation */
   h1 {
@@ -468,6 +498,16 @@ const ALL_CHILDREN = [
   "Juie","Afrain","Nafisa","Ashik","Abrar","Mou","Arpita","Anila","Ratan","Alvee",
   "Yeasmin","Sumaya","Jiniya"
 ];
+// 🔴 RED MARK: START - বাচ্চাদের বার্থডে অবজেক্ট ডেটা 🔴
+const CHILDREN_BIRTHDAYS = {
+  "Onti": "May 24",
+  "Rida": "January 15",
+  "Runu": "March 10",
+  "Anika": "December 05",
+  "Alvee": "May 23", // টেস্ট করার জন্য আজকে মে ২৩ সেট করা হয়েছে
+  "Sumaya": "August 18"
+};
+// 🔴 RED MARK: END 🔴
 
 let defaultData = {
   Saturday: { morning: ["Juie","Yeasmin","Rida","Anila","Sumaya","Afrain","Alvee"], evening: ["Runu","Mou","Onti","Jiniya","Nafisa","Abrar","Saied","Ashik","Suikraching"], offday: ["Anika","Arpita","Ratan"], leave: {} },
@@ -487,6 +527,22 @@ function formatDisplayDate(dateStr) {
   const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   return d.toLocaleDateString('en-US', opts);
 }
+  // 🔴 RED MARK: START - আজকের জন্মদিনের নাম খুঁজে বের করার লজিক 🔴
+function getTodayBirthdays() {
+  const dateVal = document.getElementById('dateInput').value;
+  let targetDate = dateVal ? new Date(dateVal + 'T00:00:00') : new Date();
+  
+  let birthdayKids = [];
+  Object.entries(CHILDREN_BIRTHDAYS).forEach(([name, bday]) => {
+    const bdate = new Date(bday + " " + targetDate.getFullYear());
+    if (bdate.getDate() === targetDate.getDate() && bdate.getMonth() === targetDate.getMonth()) {
+      birthdayKids.push(name);
+    }
+  });
+  return birthdayKids;
+}
+// 🔴 RED MARK: END 🔴
+
 
 function render() {
   const card = document.getElementById('rosterCard');
@@ -498,6 +554,19 @@ function render() {
   const data = rosterData[day];
 
   if (!data) return;
+   // 🔴 RED MARK: START - বার্থডে ব্যানার এবং অ্যানিমেশন ট্রিগার লজিক 🔴
+  const todayBirthdays = getTodayBirthdays();
+  const banner = document.getElementById('birthdayBanner');
+  if (todayBirthdays.length > 0) {
+    banner.style.display = 'block';
+    banner.innerHTML = `🎉 Happy Birthday ${todayBirthdays.join(', ')}! 🎂✨`;
+    startBirthdayAnimation();
+  } else {
+    banner.style.display = 'none';
+    stopBirthdayAnimation();
+  }
+  // 🔴 RED MARK: END 🔴
+
 
   const morningSet = new Set(data.morning);
   const eveningSet = new Set(data.evening);
@@ -515,6 +584,13 @@ function render() {
     const isMorning = morningSet.has(name);
     const isEvening = eveningSet.has(name);
     let delay = (index * 0.03) + 's';
+     // 🔴 RED MARK: START - নাম প্রিন্ট করার সময় জন্মদিন হলে কেক ইমোজি বসানোর লজিক 🔴
+    let displayName = name;
+    if (todayBirthdays.includes(name)) {
+      displayName = `🎂 ${name} 🎂`;
+    }
+    // 🔴 RED MARK: END 🔴
+
 
     if (isMorning && isEvening) {
       bothRows += `<tr class="row-both" style="animation-delay: ${delay}"><td>${name}</td><td>1</td><td>1</td></tr>`;
@@ -593,6 +669,58 @@ let tableRows = morningRows + bothRows + eveningRows;
     card.classList.add('run-animation');
   }, 10);
 }
+// 🔴 RED MARK: START - Confetti (বেলুন ও ফ্লাওয়ার রেইন) অ্যানিমেশন মেইন ইঞ্জিন 🔴
+let animationTimer;
+const canvas = document.getElementById('birthdayCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function startBirthdayAnimation() {
+  canvas.style.display = 'block';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  particles = [];
+  for (let i = 0; i < 100; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * canvas.height,
+      color: `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.8)`,
+      tilt: Math.random() * 10 - 5
+    });
+  }
+  if(!animationTimer) animateConfetti();
+}
+
+function stopBirthdayAnimation() {
+  canvas.style.display = 'none';
+  cancelAnimationFrame(animationTimer);
+  animationTimer = null;
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach((p, index) => {
+    p.y += Math.cos(p.d) + 1 + p.r / 2;
+    p.x += Math.sin(p.tilt);
+    ctx.beginPath();
+    ctx.lineWidth = p.r;
+    ctx.strokeStyle = p.color;
+    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+    ctx.stroke();
+
+    if (p.y > canvas.height) {
+      particles[index] = {
+        x: Math.random() * canvas.width, y: -20, r: p.r, d: p.d, color: p.color, tilt: p.tilt
+      };
+    }
+  });
+  animationTimer = requestAnimationFrame(animateConfetti);
+}
+window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+// 🔴 RED MARK: END 🔴
 
 // ===== ABSOLUTE BULLETPROOF DOWNLOAD BLOCK =====
 function downloadRosterImage() {
